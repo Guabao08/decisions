@@ -5,10 +5,12 @@ import type { Idea } from "@/app/api/generate-ideas/route";
 import SwipeCard, { type SwipeCardHandle, type SwipeDirection } from "./SwipeCard";
 
 export default function SwipeScreen({
+  problem,
   ideas,
   onFinish,
   onRestart,
 }: {
+  problem: string;
   ideas: Idea[];
   onFinish: (finalists: Idea[]) => void;
   onRestart: () => void;
@@ -18,11 +20,51 @@ export default function SwipeScreen({
   const [kept, setKept] = useState<Idea[]>([]);
   const [roundSize, setRoundSize] = useState(ideas.length);
   const [noneKept, setNoneKept] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
   const topCardRef = useRef<SwipeCardHandle>(null);
+  // Accumulated across the whole session — used as signal for the next round's
+  // refinement call, not re-rendered on every swipe.
+  const passedEverRef = useRef<Idea[]>([]);
+  const seenTitlesRef = useRef<Set<string>>(
+    new Set(ideas.map((idea) => idea.title.toLowerCase()))
+  );
+
+  async function startNextRound(newKept: Idea[]) {
+    setIsRefining(true);
+    let freshIdeas: Idea[] = [];
+    try {
+      const res = await fetch("/api/refine-ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problem,
+          liked: newKept.map(({ title, description }) => ({ title, description })),
+          passed: passedEverRef.current.map(({ title, description }) => ({ title, description })),
+          seenTitles: Array.from(seenTitlesRef.current),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.ideas)) {
+        freshIdeas = data.ideas as Idea[];
+      }
+    } catch {
+      // Network hiccup — fall back to just carrying the kept ideas forward below.
+    }
+
+    freshIdeas.forEach((idea) => seenTitlesRef.current.add(idea.title.toLowerCase()));
+
+    const nextDeck = [...newKept, ...freshIdeas];
+    setDeck(nextDeck);
+    setKept([]);
+    setRoundSize(nextDeck.length);
+    setRound((r) => r + 1);
+    setIsRefining(false);
+  }
 
   function handleExited(direction: SwipeDirection) {
     const [current, ...rest] = deck;
     const newKept = direction === "right" ? [...kept, current] : kept;
+    if (direction === "left") passedEverRef.current.push(current);
 
     if (rest.length === 0) {
       if (newKept.length === 0) {
@@ -33,10 +75,7 @@ export default function SwipeScreen({
         onFinish(newKept);
         return;
       }
-      setDeck(newKept);
-      setKept([]);
-      setRoundSize(newKept.length);
-      setRound((r) => r + 1);
+      startNextRound(newKept);
       return;
     }
 
@@ -61,6 +100,17 @@ export default function SwipeScreen({
     );
   }
 
+  if (isRefining) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+        <div className="mb-6 h-10 w-10 animate-spin rounded-full border-2 border-neutral-700 border-t-violet-400" />
+        <p className="text-neutral-400">
+          Learning from your picks and sharpening the next round...
+        </p>
+      </div>
+    );
+  }
+
   const visible = deck.slice(0, 3);
   const seen = roundSize - deck.length;
 
@@ -69,7 +119,7 @@ export default function SwipeScreen({
       <div className="mb-6 text-center">
         {round > 1 && (
           <p className="mb-1 text-sm font-medium uppercase tracking-wide text-violet-400">
-            Round {round} — narrowing down your top picks
+            Round {round} — refined picks based on your taste
           </p>
         )}
         <p className="text-sm text-neutral-500">

@@ -51,7 +51,7 @@ export default function Page() {
       )}
 
       {view === "swipe" && (
-        <SwipeScreen ideas={ideas} onFinish={(f) => {
+        <SwipeScreen problem={problem} ideas={ideas} onFinish={(f) => {
           setFinalists(f);
           setView("final");
         }} onRestart={reset} />

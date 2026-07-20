@@ -5,6 +5,7 @@ export interface Idea {
   id: string;
   title: string;
   description: string;
+  emoji: string;
 }
 
 const MIN_IDEAS = 15;
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 
   try {
     const { ideas } = await generateStructured<{
-      ideas: Array<{ title: string; description: string }>;
+      ideas: Array<{ title: string; description: string; emoji: string }>;
     }>({
       system:
         "You are a sharp, creative problem-solving assistant. Given a problem someone is facing, " +
@@ -48,8 +49,14 @@ export async function POST(request: Request) {
                   type: "string",
                   description: "One or two sentences explaining the idea concretely.",
                 },
+                emoji: {
+                  type: "string",
+                  maxLength: 8,
+                  description:
+                    "A single emoji (no text) that visually represents this idea.",
+                },
               },
-              required: ["title", "description"],
+              required: ["title", "description", "emoji"],
             },
           },
         },
@@ -62,6 +69,7 @@ export async function POST(request: Request) {
       id: `idea-${index}`,
       title: idea.title,
       description: idea.description,
+      emoji: idea.emoji,
     }));
 
     return NextResponse.json({ ideas: withIds });
