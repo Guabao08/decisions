@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { Idea } from "@/app/api/generate-ideas/route";
+import { gradientForIdea } from "@/lib/ideaVisuals";
 
 export type SwipeDirection = "left" | "right";
 
@@ -67,24 +68,31 @@ const SwipeCard = forwardRef<
       dragElastic={1}
       onDragEnd={isTop ? handleDragEnd : undefined}
     >
-      <div className="relative flex h-[440px] w-full select-none flex-col justify-between overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 p-6 shadow-xl shadow-black/40">
+      <div className="relative flex h-[440px] w-full select-none flex-col overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-xl shadow-black/40">
         {isTop && (
           <>
             <motion.div
               style={{ opacity: likeOpacity }}
-              className="absolute right-6 top-6 rotate-12 rounded-lg border-4 border-emerald-400 px-3 py-1 text-xl font-black text-emerald-400"
+              className="absolute right-6 top-6 z-10 rotate-12 rounded-lg border-4 border-emerald-400 px-3 py-1 text-xl font-black text-emerald-400"
             >
               KEEP
             </motion.div>
             <motion.div
               style={{ opacity: nopeOpacity }}
-              className="absolute left-6 top-6 -rotate-12 rounded-lg border-4 border-red-400 px-3 py-1 text-xl font-black text-red-400"
+              className="absolute left-6 top-6 z-10 -rotate-12 rounded-lg border-4 border-red-400 px-3 py-1 text-xl font-black text-red-400"
             >
               PASS
             </motion.div>
           </>
         )}
-        <div className="overflow-y-auto pt-8">
+        <div
+          className={`flex h-40 shrink-0 items-center justify-center bg-gradient-to-br ${gradientForIdea(idea.id)}`}
+        >
+          <span className="text-7xl drop-shadow-lg" role="img" aria-label="">
+            {idea.emoji}
+          </span>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
           <h2 className="text-2xl font-bold text-white">{idea.title}</h2>
           <p className="mt-4 text-neutral-300">{idea.description}</p>
         </div>

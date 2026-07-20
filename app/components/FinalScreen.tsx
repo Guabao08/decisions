@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Idea } from "@/app/api/generate-ideas/route";
+import { gradientForIdea } from "@/lib/ideaVisuals";
 
 function FinalIdeaCard({ problem, idea }: { problem: string; idea: Idea }) {
   const [steps, setSteps] = useState<string[] | null>(null);
@@ -30,8 +31,19 @@ function FinalIdeaCard({ problem, idea }: { problem: string; idea: Idea }) {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 shadow-xl shadow-black/30">
-      <h3 className="text-xl font-bold text-white">{idea.title}</h3>
-      <p className="mt-2 text-neutral-300">{idea.description}</p>
+      <div className="flex items-start gap-4">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-2xl ${gradientForIdea(idea.id)}`}
+        >
+          <span role="img" aria-label="">
+            {idea.emoji}
+          </span>
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-white">{idea.title}</h3>
+          <p className="mt-2 text-neutral-300">{idea.description}</p>
+        </div>
+      </div>
 
       {!steps && (
         <button
