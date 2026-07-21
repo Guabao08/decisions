@@ -21,6 +21,12 @@ export default function SwipeScreen({
   const [roundSize, setRoundSize] = useState(ideas.length);
   const [noneKept, setNoneKept] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
+  const [undoStack, setUndoStack] = useState<
+    Array<{ idea: Idea; direction: SwipeDirection }>
+  >([]);
+  // Bumped on every undo and mixed into card keys: a restored card must
+  // remount, or SwipeCard's internal has-exited guard blocks re-swiping it.
+  const [epoch, setEpoch] = useState(0);
   const topCardRef = useRef<SwipeCardHandle>(null);
   // Accumulated across the whole session — used as signal for the next round's
   // refinement call, not re-rendered on every swipe.
@@ -56,6 +62,9 @@ export default function SwipeScreen({
     const nextDeck = [...newKept, ...freshIdeas];
     setDeck(nextDeck);
     setKept([]);
+    // Swipes from the finished round already fed the refinement call, so
+    // they can no longer be taken back.
+    setUndoStack([]);
     setRoundSize(nextDeck.length);
     setRound((r) => r + 1);
     setIsRefining(false);
@@ -81,6 +90,20 @@ export default function SwipeScreen({
 
     setDeck(rest);
     setKept(newKept);
+    setUndoStack((stack) => [...stack, { idea: current, direction }]);
+  }
+
+  function undoLastSwipe() {
+    const last = undoStack[undoStack.length - 1];
+    if (!last) return;
+    setUndoStack((stack) => stack.slice(0, -1));
+    if (last.direction === "right") {
+      setKept((k) => k.slice(0, -1));
+    } else {
+      passedEverRef.current.pop();
+    }
+    setDeck((d) => [last.idea, ...d]);
+    setEpoch((e) => e + 1);
   }
 
   if (noneKept) {
@@ -130,7 +153,7 @@ export default function SwipeScreen({
       <div className="relative h-[440px] w-full max-w-sm">
         {visible.map((idea, i) => (
           <SwipeCard
-            key={idea.id}
+            key={`${idea.id}:${epoch}`}
             ref={i === 0 ? topCardRef : undefined}
             idea={idea}
             index={i}
@@ -144,13 +167,21 @@ export default function SwipeScreen({
         Drag a card, or use the buttons below
       </p>
 
-      <div className="mt-4 flex gap-6">
+      <div className="mt-4 flex items-center gap-6">
         <button
           onClick={() => topCardRef.current?.fly("left")}
           aria-label="Discard"
           className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-neutral-700 bg-neutral-900 text-3xl text-red-400 transition hover:border-red-500 hover:bg-red-500/10"
         >
           ✕
+        </button>
+        <button
+          onClick={undoLastSwipe}
+          disabled={undoStack.length === 0}
+          aria-label="Undo last swipe"
+          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-neutral-700 bg-neutral-900 text-xl text-amber-400 transition hover:border-amber-500 hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-700 disabled:hover:bg-neutral-900"
+        >
+          ↩
         </button>
         <button
           onClick={() => topCardRef.current?.fly("right")}
