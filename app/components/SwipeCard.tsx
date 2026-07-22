@@ -68,44 +68,57 @@ const SwipeCard = forwardRef<
       dragElastic={1}
       onDragEnd={isTop ? handleDragEnd : undefined}
     >
-      <div className="relative flex h-[440px] w-full select-none flex-col overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-xl shadow-black/40">
+      <div className="relative flex h-[440px] w-full select-none flex-col overflow-hidden rounded-[28px] bg-gradient-to-b from-neutral-900 to-neutral-950 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.85)] ring-1 ring-white/10">
+        {/* Ambient per-idea glow: same gradient identity as before, whispered
+            instead of shouted. */}
+        <div
+          className={`pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-gradient-to-br opacity-25 blur-3xl ${gradientForIdea(idea.id)}`}
+        />
         {isTop && (
           <>
             <motion.div
               style={{ opacity: likeOpacity }}
-              className="absolute right-6 top-6 z-10 rotate-12 rounded-lg border-4 border-emerald-400 px-3 py-1 text-xl font-black text-emerald-400"
+              className="absolute right-6 top-6 z-10 rotate-12 rounded-xl border-2 border-emerald-400/80 bg-emerald-500/10 px-3 py-1 text-lg font-bold tracking-widest text-emerald-300 backdrop-blur-sm"
             >
               KEEP
             </motion.div>
             <motion.div
               style={{ opacity: nopeOpacity }}
-              className="absolute left-6 top-6 z-10 -rotate-12 rounded-lg border-4 border-red-400 px-3 py-1 text-xl font-black text-red-400"
+              className="absolute left-6 top-6 z-10 -rotate-12 rounded-xl border-2 border-red-400/80 bg-red-500/10 px-3 py-1 text-lg font-bold tracking-widest text-red-300 backdrop-blur-sm"
             >
               PASS
             </motion.div>
           </>
         )}
-        <div
-          className={`flex h-40 shrink-0 items-center justify-center bg-gradient-to-br ${gradientForIdea(idea.id)}`}
-        >
-          <span className="text-7xl drop-shadow-lg" role="img" aria-label="">
-            {idea.emoji}
-          </span>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          <h2 className="text-2xl font-bold text-white">{idea.title}</h2>
-          <p className="mt-4 text-neutral-300">{idea.description}</p>
-          <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
-              Best case
-            </p>
-            <p className="mt-1 text-sm text-emerald-200/90">{idea.bestCase}</p>
+        <div className="flex-1 overflow-y-auto p-7">
+          <div
+            className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br text-3xl shadow-lg shadow-black/30 ring-1 ring-white/20 ${gradientForIdea(idea.id)}`}
+          >
+            <span role="img" aria-label="">
+              {idea.emoji}
+            </span>
           </div>
-          <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-400">
-              Worst case
-            </p>
-            <p className="mt-1 text-sm text-amber-200/90">{idea.worstCase}</p>
+          <h2 className="mt-5 text-[22px] font-semibold leading-snug tracking-tight text-white">
+            {idea.title}
+          </h2>
+          <p className="mt-3 text-[15px] leading-relaxed text-neutral-400">
+            {idea.description}
+          </p>
+          <div className="mt-6 space-y-3 border-t border-white/5 pt-5">
+            <div className="flex gap-3">
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+              <p className="text-sm leading-relaxed text-neutral-400">
+                <span className="font-medium text-emerald-300">Best case</span>{" "}
+                — {idea.bestCase}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+              <p className="text-sm leading-relaxed text-neutral-400">
+                <span className="font-medium text-amber-300">Worst case</span>{" "}
+                — {idea.worstCase}
+              </p>
+            </div>
           </div>
         </div>
       </div>
