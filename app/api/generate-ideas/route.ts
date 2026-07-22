@@ -5,6 +5,7 @@ export interface Idea {
   id: string;
   title: string;
   description: string;
+  bestCase: string;
   worstCase: string;
   emoji: string;
 }
@@ -21,7 +22,13 @@ export async function POST(request: Request) {
 
   try {
     const { ideas } = await generateStructured<{
-      ideas: Array<{ title: string; description: string; worstCase: string; emoji: string }>;
+      ideas: Array<{
+        title: string;
+        description: string;
+        bestCase: string;
+        worstCase: string;
+        emoji: string;
+      }>;
     }>({
       system:
         "You are a sharp, creative problem-solving assistant. Given a problem someone is facing, " +
@@ -29,8 +36,9 @@ export async function POST(request: Request) {
         "actionable potential solutions or approaches. Avoid near-duplicates or trivial rephrasings of " +
         "the same idea. Every idea should be realistically viable, not filler. Cover a range of angles " +
         "(quick fixes, structural changes, unconventional approaches, etc.) where relevant. " +
-        "For each idea, also give an honest worst-case scenario: the most plausible bad outcome if " +
-        "the idea backfires. Be realistic, not catastrophizing — one sentence.",
+        "For each idea, also give an honest best-case scenario (the most plausible great outcome if " +
+        "it works) and worst-case scenario (the most plausible bad outcome if it backfires). Be " +
+        "realistic in both directions — no hype, no catastrophizing — one sentence each.",
       prompt: `The problem: ${problem.trim()}`,
       toolName: "submit_ideas",
       toolDescription: `Submit the list of ${MIN_IDEAS}-${MAX_IDEAS} generated solution ideas.`,
@@ -52,6 +60,11 @@ export async function POST(request: Request) {
                   type: "string",
                   description: "One or two sentences explaining the idea concretely.",
                 },
+                bestCase: {
+                  type: "string",
+                  description:
+                    "One sentence: the most plausible great outcome if this idea works. Realistic, no hype.",
+                },
                 worstCase: {
                   type: "string",
                   description:
@@ -64,7 +77,7 @@ export async function POST(request: Request) {
                     "A single emoji (no text) that visually represents this idea.",
                 },
               },
-              required: ["title", "description", "worstCase", "emoji"],
+              required: ["title", "description", "bestCase", "worstCase", "emoji"],
             },
           },
         },
@@ -77,6 +90,7 @@ export async function POST(request: Request) {
       id: `idea-${index}`,
       title: idea.title,
       description: idea.description,
+      bestCase: idea.bestCase,
       worstCase: idea.worstCase,
       emoji: idea.emoji,
     }));
