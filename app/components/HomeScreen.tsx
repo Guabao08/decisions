@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import type { HistoryEntry } from "@/lib/history";
 
 export default function HomeScreen({
   onSubmit,
+  history,
+  onOpenEntry,
+  onDeleteEntry,
 }: {
   onSubmit: (problem: string) => void;
+  history: HistoryEntry[];
+  onOpenEntry: (entry: HistoryEntry) => void;
+  onDeleteEntry: (id: string) => void;
 }) {
   const [problem, setProblem] = useState("");
 
@@ -56,6 +63,47 @@ export default function HomeScreen({
             Find my solutions
           </button>
         </form>
+
+        {history.length > 0 && (
+          <div className="mt-10">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+              Past decisions
+            </h2>
+            <ul className="space-y-2">
+              {history.map((entry) => (
+                <li
+                  key={entry.id}
+                  className="group flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-3 transition hover:border-neutral-700 hover:bg-neutral-900/70"
+                >
+                  <button
+                    onClick={() => onOpenEntry(entry)}
+                    className="flex-1 text-left"
+                  >
+                    <p className="truncate text-sm text-neutral-200">
+                      {entry.problem}
+                    </p>
+                    <p className="mt-0.5 text-xs text-neutral-500">
+                      {new Date(entry.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}{" "}
+                      · {entry.finalists.length}{" "}
+                      {entry.finalists.length === 1 ? "finalist" : "finalists"}
+                    </p>
+                  </button>
+                  <button
+                    onClick={() => onDeleteEntry(entry.id)}
+                    aria-label="Delete this decision"
+                    className="shrink-0 rounded-lg px-2 py-1 text-neutral-600 opacity-0 transition hover:bg-red-500/10 hover:text-red-400 focus:opacity-100 group-hover:opacity-100"
+                  >
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

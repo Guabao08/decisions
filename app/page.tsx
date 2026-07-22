@@ -6,6 +6,7 @@ import ProcessingScreen from "@/app/components/ProcessingScreen";
 import SwipeScreen from "@/app/components/SwipeScreen";
 import FinalScreen from "@/app/components/FinalScreen";
 import type { Idea } from "@/app/api/generate-ideas/route";
+import { deleteEntry, saveEntry, useHistory } from "@/lib/history";
 
 type View = "home" | "processing" | "swipe" | "final";
 
@@ -15,6 +16,7 @@ export default function Page() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [finalists, setFinalists] = useState<Idea[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const history = useHistory();
 
   function reset() {
     setView("home");
@@ -33,6 +35,14 @@ export default function Page() {
             setError(null);
             setView("processing");
           }}
+          history={history}
+          onOpenEntry={(entry) => {
+            setProblem(entry.problem);
+            setFinalists(entry.finalists);
+            setError(null);
+            setView("final");
+          }}
+          onDeleteEntry={deleteEntry}
         />
       )}
 
@@ -53,6 +63,7 @@ export default function Page() {
       {view === "swipe" && (
         <SwipeScreen problem={problem} ideas={ideas} onFinish={(f) => {
           setFinalists(f);
+          saveEntry(problem, f);
           setView("final");
         }} onRestart={reset} />
       )}
