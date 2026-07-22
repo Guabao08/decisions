@@ -95,6 +95,12 @@ const SwipeCard = forwardRef<
         <div className="flex-1 overflow-y-auto p-6">
           <h2 className="text-2xl font-bold text-white">{idea.title}</h2>
           <p className="mt-4 text-neutral-300">{idea.description}</p>
+          <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-400">
+              Worst case
+            </p>
+            <p className="mt-1 text-sm text-amber-200/90">{idea.worstCase}</p>
+          </div>
         </div>
       </div>
     </motion.div>

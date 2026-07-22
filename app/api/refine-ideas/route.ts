@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const seenList = (seenTitles ?? []).join("; ") || "(none)";
 
     const { ideas } = await generateStructured<{
-      ideas: Array<{ title: string; description: string; emoji: string }>;
+      ideas: Array<{ title: string; description: string; worstCase: string; emoji: string }>;
     }>({
       system:
         "You are a sharp, creative problem-solving assistant helping refine a shortlist of solutions. " +
@@ -42,7 +42,8 @@ export async function POST(request: Request) {
         `feedback, generate ${MIN_NEW_IDEAS}-${MAX_NEW_IDEAS} brand-new ideas that lean into the pattern ` +
         "behind what they kept, while steering clear of the style or substance of what they passed on. " +
         "Every new idea must be genuinely new — not a reworded or trivial variation of any idea already " +
-        "shown to them.",
+        "shown to them. For each idea, also give an honest worst-case scenario: the most plausible bad " +
+        "outcome if the idea backfires. Be realistic, not catastrophizing — one sentence.",
       prompt:
         `The problem: ${problem.trim()}\n\n` +
         `Ideas they kept (lean into this pattern):\n${likedList}\n\n` +
@@ -69,6 +70,11 @@ export async function POST(request: Request) {
                   type: "string",
                   description: "One or two sentences explaining the idea concretely.",
                 },
+                worstCase: {
+                  type: "string",
+                  description:
+                    "One sentence: the most plausible bad outcome if this idea backfires. Realistic, not catastrophizing.",
+                },
                 emoji: {
                   type: "string",
                   maxLength: 8,
@@ -76,7 +82,7 @@ export async function POST(request: Request) {
                     "A single emoji (no text) that visually represents this idea.",
                 },
               },
-              required: ["title", "description", "emoji"],
+              required: ["title", "description", "worstCase", "emoji"],
             },
           },
         },
@@ -89,6 +95,7 @@ export async function POST(request: Request) {
       id: randomUUID(),
       title: idea.title,
       description: idea.description,
+      worstCase: idea.worstCase,
       emoji: idea.emoji,
     }));
 

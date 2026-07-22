@@ -5,6 +5,7 @@ export interface Idea {
   id: string;
   title: string;
   description: string;
+  worstCase: string;
   emoji: string;
 }
 
@@ -20,14 +21,16 @@ export async function POST(request: Request) {
 
   try {
     const { ideas } = await generateStructured<{
-      ideas: Array<{ title: string; description: string; emoji: string }>;
+      ideas: Array<{ title: string; description: string; worstCase: string; emoji: string }>;
     }>({
       system:
         "You are a sharp, creative problem-solving assistant. Given a problem someone is facing, " +
         `you generate a wide, genuinely diverse set of ${MIN_IDEAS}-${MAX_IDEAS} distinct, concrete, ` +
         "actionable potential solutions or approaches. Avoid near-duplicates or trivial rephrasings of " +
         "the same idea. Every idea should be realistically viable, not filler. Cover a range of angles " +
-        "(quick fixes, structural changes, unconventional approaches, etc.) where relevant.",
+        "(quick fixes, structural changes, unconventional approaches, etc.) where relevant. " +
+        "For each idea, also give an honest worst-case scenario: the most plausible bad outcome if " +
+        "the idea backfires. Be realistic, not catastrophizing — one sentence.",
       prompt: `The problem: ${problem.trim()}`,
       toolName: "submit_ideas",
       toolDescription: `Submit the list of ${MIN_IDEAS}-${MAX_IDEAS} generated solution ideas.`,
@@ -49,6 +52,11 @@ export async function POST(request: Request) {
                   type: "string",
                   description: "One or two sentences explaining the idea concretely.",
                 },
+                worstCase: {
+                  type: "string",
+                  description:
+                    "One sentence: the most plausible bad outcome if this idea backfires. Realistic, not catastrophizing.",
+                },
                 emoji: {
                   type: "string",
                   maxLength: 8,
@@ -56,7 +64,7 @@ export async function POST(request: Request) {
                     "A single emoji (no text) that visually represents this idea.",
                 },
               },
-              required: ["title", "description", "emoji"],
+              required: ["title", "description", "worstCase", "emoji"],
             },
           },
         },
@@ -69,6 +77,7 @@ export async function POST(request: Request) {
       id: `idea-${index}`,
       title: idea.title,
       description: idea.description,
+      worstCase: idea.worstCase,
       emoji: idea.emoji,
     }));
 

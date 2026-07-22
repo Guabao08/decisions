@@ -42,6 +42,10 @@ function FinalIdeaCard({ problem, idea }: { problem: string; idea: Idea }) {
         <div>
           <h3 className="text-xl font-bold text-white">{idea.title}</h3>
           <p className="mt-2 text-neutral-300">{idea.description}</p>
+          <p className="mt-3 text-sm text-amber-400/90">
+            <span className="font-semibold uppercase tracking-wide">Worst case:</span>{" "}
+            <span className="text-amber-200/80">{idea.worstCase}</span>
+          </p>
         </div>
       </div>
 
