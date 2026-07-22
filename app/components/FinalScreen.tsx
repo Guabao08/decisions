@@ -30,26 +30,32 @@ function FinalIdeaCard({ problem, idea }: { problem: string; idea: Idea }) {
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 shadow-xl shadow-black/30">
+    <div className="rounded-3xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
       <div className="flex items-start gap-4">
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-2xl ${gradientForIdea(idea.id)}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl shadow-lg shadow-black/30 ring-1 ring-white/20 ${gradientForIdea(idea.id)}`}
         >
           <span role="img" aria-label="">
             {idea.emoji}
           </span>
         </div>
         <div>
-          <h3 className="text-xl font-bold text-white">{idea.title}</h3>
-          <p className="mt-2 text-neutral-300">{idea.description}</p>
-          <p className="mt-3 text-sm text-emerald-400/90">
-            <span className="font-semibold uppercase tracking-wide">Best case:</span>{" "}
-            <span className="text-emerald-200/80">{idea.bestCase}</span>
-          </p>
-          <p className="mt-1 text-sm text-amber-400/90">
-            <span className="font-semibold uppercase tracking-wide">Worst case:</span>{" "}
-            <span className="text-amber-200/80">{idea.worstCase}</span>
-          </p>
+          <h3 className="text-xl font-semibold tracking-tight text-white">{idea.title}</h3>
+          <p className="mt-2 text-[15px] leading-relaxed text-neutral-400">{idea.description}</p>
+          <div className="mt-4 space-y-2 border-t border-white/5 pt-3">
+            <div className="flex gap-3">
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+              <p className="text-sm leading-relaxed text-neutral-400">
+                <span className="font-medium text-emerald-300">Best case</span> — {idea.bestCase}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+              <p className="text-sm leading-relaxed text-neutral-400">
+                <span className="font-medium text-amber-300">Worst case</span> — {idea.worstCase}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
